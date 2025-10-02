@@ -1,0 +1,14 @@
+# https://developer.hashicorp.com/boundary/docs/commands/server
+
+[Unit]
+Description=Boundary Controller
+After=network-online.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+ExecStart=/usr/bin/boundary server -config=/etc/boundary.d/controller.hcl
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF

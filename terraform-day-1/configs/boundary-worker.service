@@ -1,0 +1,13 @@
+# https://developer.hashicorp.com/boundary/docs/commands/server
+[Unit]
+Description=Boundary Worker
+After=boundary-controller.service
+Requires=boundary-controller.service
+
+[Service]
+ExecStart=/usr/bin/boundary server -config=/etc/boundary.d/worker.hcl
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
