@@ -141,28 +141,6 @@ module "main" {
 
 }
 
-# uncomment the following when deploying a dev environment
-# # Generate a random password for boundary
-# resource "random_password" "boundary_password" {
-#   length  = 16
-#   special = true
-# }
-
-# # Write it to a local file
-# resource "local_file" "boundary_password" {
-#   content  = random_password.boundary_password.result
-#   filename = "${path.module}/../secrets/boundary_password.txt"
-# }
-
-# # Generate a random vault token
-# resource "random_uuid" "vault_root_token" {}
-
-# # Write it to a local file
-# resource "local_file" "vault_token" {
-#   content  = random_uuid.vault_root_token.result
-#   filename = "${path.module}/../secrets/boundary_password.txt"
-# }
-
 
 resource "aws_instance" "target_vsi" {
   ami                         = data.aws_ami.ubuntu.id
@@ -190,51 +168,52 @@ resource "aws_instance" "boundary_vault_vsi" {
     command = "chmod 600 ${local_file.operator_private_key_pem.filename}"
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      templatefile("${path.module}/init.sh.tpl", {
-        boundary_password = random_password.boundary_password.result
-        vault_root_token  = random_uuid.vault_root_token.result
-      })
-    ]
-  }
 
-  provisioner "file" {
-    source      = "configs/vault.hcl"
-    destination = "/etc/vault.d/vault.hcl"
-  }
+  # Render configuration and service files from templates
 
   provisioner "file" {
     source      = "configs/boundary-controller.hcl"
-    destination = "/etc/boundary.d/controller.hcl"
+    destination = "/etc/boundary.d/boundary-controller.hcl"
   }
 
   provisioner "file" {
     source      = "configs/boundary-worker.hcl"
-    destination = "/etc/boundary.d/worker.hcl"
+    destination = "/etc/boundary.d/boundary-worker.hcl"
+  }
+
+  provisioner "file" {
+    source      = "configs/vault.hcl"
+    destination = "/tmp/vault.hcl"
   }
 
   provisioner "file" {
     source      = "configs/vault.service"
-    destination = "/etc/systemd/system/vault.service"
+    destination = "/tmp/vault.service"
   }
 
   provisioner "file" {
     source      = "configs/boundary-controller.service"
-    destination = "/etc/systemd/system/boundary-controller.service"
+    destination = "/tmp/boundary-controller.service"
   }
 
   provisioner "file" {
     source      = "configs/boundary-worker.service"
-    destination = "/etc/systemd/system/boundary-worker.service"
+    destination = "/tmp/boundary-worker.service"
   }
+
+  # Install and initialize boundary and vault
 
   provisioner "remote-exec" {
     inline = [
-      "sudo systemctl daemon-reload",
-      "sudo systemctl enable vault boundary-controller boundary-worker",
-      "sudo systemctl start vault boundary-controller boundary-worker"
+      templatefile("${path.module}/init.sh.tpl", {
+      })
     ]
   }
-
+  # Copy init outputs to secrets directory to reference in day 2
+  provisioner "local-exec" {
+    command = "scp -o StrictHostKeyChecking=no -i ../secrets/operator_key.pem ubuntu@${self.public_ip}:~/vault_init.json ../secrets/vault_init.json"
+  }
+  provisioner "local-exec" {
+    command = "scp -o StrictHostKeyChecking=no -i ../secrets/operator_key.pem ubuntu@${self.public_ip}:~/boundary_init ../secrets/boundary_init"
+  }
 }

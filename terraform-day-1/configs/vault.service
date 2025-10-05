@@ -1,0 +1,16 @@
+
+# Ref: https://developer.hashicorp.com/vault/tutorials/operations/production-hardening#vault-as-a-systemd-service
+[Unit]
+Description=Vault
+After=network-online.target
+Requires=network-online.target
+
+[Service]
+ExecStart=/usr/bin/vault server -config=/etc/vault.d/vault.hcl
+Restart=on-failure
+LimitMEMLOCK=infinity
+CapabilityBoundingSet=CAP_IPC_LOCK
+AmbientCapabilities=CAP_IPC_LOCK
+
+[Install]
+WantedBy=multi-user.target

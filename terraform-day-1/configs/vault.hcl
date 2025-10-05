@@ -1,7 +1,7 @@
 # Ref: https://developer.hashicorp.com/vault/docs/configuration
 
 storage "file" {
-  path = "/opt/vault/data"
+  path = "/tmp/vault/data"
 }
 
 listener "tcp" {

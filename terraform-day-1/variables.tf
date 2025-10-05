@@ -21,5 +21,9 @@ variable "instance_size" {
 
 variable "boundary_username" {
   type    = string
-  default = "dev-admin"
+  default = "admin"
+}
+
+variable "aws_region" {
+  default = "us-east-2"
 }

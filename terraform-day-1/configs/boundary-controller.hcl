@@ -1,5 +1,6 @@
 # # Ref: https://developer.hashicorp.com/boundary/docs/configuration
 
+
 disable_mlock = true
 hcp_boundary_cluster_id = "poc"
 
@@ -7,7 +8,7 @@ controller {
   name = "controller-1"
   description = "Boundary Controller"
   database {
-    url = "postgresql://boundary:boundarypassword@localhost:5432/boundary?sslmode=disable"
+    url = "postgresql://boundary:derp@localhost:5432/boundary?sslmode=disable"
   }
   public_cluster_addr = "127.0.0.1"
 }
@@ -15,11 +16,13 @@ controller {
 listener "tcp" {
   purpose = "api"
   address = "0.0.0.0:9200"
+  tls_disable = true
 }
 
 listener "tcp" {
   purpose = "cluster"
   address = "0.0.0.0:9201"
+  tls_disable = true
 }
 
 # Ref for KMS config: https://developer.hashicorp.com/boundary/docs/configuration/kms

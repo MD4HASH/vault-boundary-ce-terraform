@@ -1,10 +1,7 @@
-disable_mlock = true
-hcp_boundary_cluster_id = "poc"
-
 worker {
-  name        = "worker-1"
-  description = "Boundary Worker"
-  controller_generated_activation_token = ""
+  auth_storage_path = "/tmp/"
+  initial_upstreams = ["127.0.0.1:9201"]
+  controller_generated_activation_token = "3M2qF8vT5bXzRkYp"
 }
 
 listener "tcp" {
