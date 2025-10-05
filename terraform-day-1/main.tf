@@ -173,12 +173,12 @@ resource "aws_instance" "boundary_vault_vsi" {
 
   provisioner "file" {
     source      = "configs/boundary-controller.hcl"
-    destination = "/etc/boundary.d/boundary-controller.hcl"
+    destination = "/tmp/boundary-controller.hcl"
   }
 
   provisioner "file" {
     source      = "configs/boundary-worker.hcl"
-    destination = "/etc/boundary.d/boundary-worker.hcl"
+    destination = "/tmp/boundary-worker.hcl"
   }
 
   provisioner "file" {
